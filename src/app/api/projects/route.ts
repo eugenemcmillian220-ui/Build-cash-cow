@@ -5,7 +5,14 @@ import { v4 as uuidv4 } from 'uuid'
 
 export async function GET() {
   try {
-    const { data: projects, error } = await supabase
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 500 }
+      )
+    }
+
+    const { data: projects, error } = await (supabase as any)
       .from('projects')
       .select('*')
       .order('created_at', { ascending: false })
@@ -24,6 +31,13 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 500 }
+      )
+    }
+
     const body = await request.json()
     const { name, description, prompt } = body
 
@@ -36,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     const projectId = uuidv4()
 
-    const { data: project, error: insertError } = await supabase
+    const { data: project, error: insertError } = await (supabase as any)
       .from('projects')
       .insert({
         id: projectId,
@@ -77,7 +91,9 @@ async function generateAppCode(projectId: string, prompt: string) {
     const code = await appBuilderAgent.generateCode(spec)
 
     // Update project with generated code
-    const { error } = await supabase
+    if (!supabase) return
+
+    const { error } = await (supabase as any)
       .from('projects')
       .update({
         code,
@@ -94,7 +110,9 @@ async function generateAppCode(projectId: string, prompt: string) {
 }
 
 async function updateProjectStatus(projectId: string, status: 'completed' | 'error') {
-  const { error } = await supabase
+  if (!supabase) return
+
+  const { error } = await (supabase as any)
     .from('projects')
     .update({ status, updated_at: new Date().toISOString() })
     .eq('id', projectId)
