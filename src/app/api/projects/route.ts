@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
-import { appBuilderAgent } from '@/lib/agent'
+import { aiAgent } from '@/lib/ai-agent'
 import { v4 as uuidv4 } from 'uuid'
 
 export async function GET() {
@@ -84,11 +84,8 @@ export async function POST(request: NextRequest) {
 
 async function generateAppCode(projectId: string, prompt: string) {
   try {
-    // Generate app specification
-    const spec = await appBuilderAgent.generateAppSpec(prompt)
-
-    // Generate code
-    const code = await appBuilderAgent.generateCode(spec)
+    // Generate code using AI agent
+    const code = await aiAgent.generateCode(prompt)
 
     // Update project with generated code
     if (!supabase) return

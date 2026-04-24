@@ -1,31 +1,47 @@
-# AI App Builder
+# AI App Builder 🚀
 
 A full-stack AI-powered application builder that generates, refines, and deploys web applications using natural language descriptions.
 
-## Features
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Next.js](https://img.shields.io/badge/Next.js-14-black.svg)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)
+
+## ✨ Features
 
 - 🤖 **AI-Powered Generation**: Describe your app in plain English and let AI generate production-ready code
-- 🎨 **Next.js 14**: Built with the latest Next.js App Router, TypeScript, and Tailwind CSS
-- 💾 **Supabase Backend**: Scalable database with PostgreSQL for project management
-- 🚀 **Vercel Deployment**: One-click deployment to Vercel
-- ♻️ **Iterative Refinement**: Use AI feedback loops to refine and improve generated code
-- 📊 **Dashboard**: Manage all your projects with a beautiful, intuitive interface
+- 🎨 **Modern UI**: Built with shadcn/ui components and Tailwind CSS
+- 💻 **Monaco Editor**: Full-featured code editor with syntax highlighting and IntelliSense
+- 🔴 **Live Preview**: WebContainer integration for real-time app preview
+- 🔄 **Iterative Refinement**: Use AI feedback loops to refine and improve generated code
+- 📊 **Project Dashboard**: Manage all your projects with a beautiful, intuitive interface
+- 📦 **Export Functionality**: Download projects as ZIP files
+- 🚀 **One-Click Deployment**: Deploy to Vercel, Netlify, or Render
+- 💾 **Supabase Backend**: Scalable database with PostgreSQL
+- 🔐 **Authentication**: Built-in auth with email/password and OAuth support
+- 👥 **Collaboration**: Real-time collaboration with team support
+- 📈 **Analytics**: Usage tracking and analytics dashboard
 
-## Tech Stack
+## 🛠 Tech Stack
 
-- **Frontend**: Next.js 14 (App Router), React, TypeScript, Tailwind CSS
+- **Frontend**: Next.js 16 (App Router), React 19, TypeScript
+- **Styling**: Tailwind CSS 4.0, shadcn/ui
+- **Editor**: Monaco Editor
+- **Preview**: WebContainer API
 - **Backend**: Next.js API Routes
 - **Database**: Supabase (PostgreSQL)
-- **AI**: OpenAI GPT-4
-- **Deployment**: Vercel
+- **AI**: Custom AI Agent with OpenAI-compatible API
+- **Deployment**: Vercel, Netlify, Render
+- **State Management**: Zustand
+- **Icons**: Lucide React
 
-## Getting Started
-
-### Prerequisites
+## 📋 Prerequisites
 
 - Node.js 18+ installed
 - Supabase account
-- OpenAI API key
+- AI API access (compatible with OpenAI format)
+
+## 🚀 Quick Start
 
 ### 1. Clone and Install
 
@@ -35,33 +51,29 @@ cd Build-cash-cow
 npm install
 ```
 
-### 2. Set Up Supabase
-
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Go to Settings > API to get your:
-   - Project URL
-   - anon/public key
-3. Navigate to the SQL Editor in Supabase
-4. Run the migration script from `supabase/migrations/001_initial_schema.sql`
-
-### 3. Configure Environment Variables
+### 2. Set Up Environment Variables
 
 Create a `.env.local` file in the root directory:
 
 ```env
-# Copy from .env.local.example and fill in your values:
-cp .env.local.example .env.local
-```
-
-Add your actual values:
-```env
+# Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-OPENAI_API_KEY=your_openai_api_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# AI Agent Configuration
+NEXT_PUBLIC_AI_API_URL=https://your-ai-api.com/v1/chat/completions
+AI_API_KEY=your_ai_api_key
+AI_MODEL=ollama/codellama:7b
+
+# Vercel Configuration
+NEXT_PUBLIC_VERCEL_ACCESS_TOKEN=your_vercel_token
+
+# App Configuration
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-### 4. Run the Development Server
+### 3. Run the Development Server
 
 ```bash
 npm run dev
@@ -69,162 +81,221 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Usage
+## 📚 Usage
 
 ### Create a New Project
 
 1. Click "Create New Project"
-2. Enter your project name and description
-3. Describe your app in detail (features, UI requirements, functionality)
-4. Click "Generate App with AI"
-5. Wait for the AI to generate your code
+2. Choose a template or describe your custom app
+3. Enter project name and description
+4. Provide detailed requirements
+5. Click "Generate App with AI"
+6. Wait for AI to generate your code
 
-### View and Refine Code
+### View and Edit Code
 
 1. Open any project from the dashboard
-2. Click "View Code" to see the generated code
-3. Use the "Refine with AI" section to request changes
-4. Describe what you want to improve or change
-5. The AI will update your code accordingly
+2. Switch to the "Code" tab
+3. View and edit the generated code in Monaco Editor
+4. Changes are auto-saved
 
-### Deploy to Vercel
+### AI Chat for Refinement
 
-1. Ensure your project status is "completed"
-2. Click "Deploy to Vercel"
-3. Wait for the deployment to finish
-4. Click "Open App" to view your deployed application
+1. Switch to the "AI Chat" tab
+2. Describe what you want to change
+3. AI will update the code accordingly
+4. Review the changes in the editor
 
-## Project Structure
+### Live Preview
+
+1. Switch to the "Preview" tab
+2. See your app running in real-time
+3. Test functionality directly
+4. Interact with your generated app
+
+### Deploy Your App
+
+1. Ensure project status is "completed"
+2. Click "Deploy" button
+3. Choose deployment platform (Vercel, Netlify, Render)
+4. Wait for deployment to complete
+5. Access your live app
+
+### Download Project
+
+1. Click "Download" button
+2. Get a ZIP file with all project files
+3. Extract and run locally
+4. Customize further as needed
+
+## 🗄 Database Schema
+
+The application uses Supabase with the following main tables:
+
+### Core Tables
+- `users` - User profiles and settings
+- `projects` - Application projects
+- `project_files` - Individual project files
+- `templates` - App starter templates
+- `chat_history` - AI conversation history
+- `deployments` - Deployment records
+
+### Collaboration Tables
+- `teams` - Team management
+- `team_members` - Team membership
+- `invitations` - Team invitations
+- `collaborators` - Project collaborators
+
+### Billing & Usage Tables
+- `credits` - User credits system
+- `subscriptions` - Subscription plans
+- `usage_logs` - Usage tracking
+
+### System Tables
+- `api_keys` - API key management
+- `webhooks` - Webhook configurations
+- `notifications` - User notifications
+- `audit_logs` - Audit trail
+- `comments` - Code discussions
+- `file_versions` - Version history
+- `settings` - User preferences
+
+## 📁 Project Structure
 
 ```
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── projects/
-│   │   │   │   ├── route.ts          # List and create projects
-│   │   │   │   └── [id]/
-│   │   │   │       ├── route.ts      # Get, update, delete project
-│   │   │   │       ├── refine/route.ts  # Refine project with AI
-│   │   │   │       └── deploy/route.ts  # Deploy project
-│   │   │   └── deployments/
-│   │   │       └── route.ts          # List deployments
-│   │   ├── create/
-│   │   │   └── page.tsx              # Create new project page
-│   │   ├── project/
-│   │   │   └── [id]/
-│   │   │       └── page.tsx          # Project detail page
-│   │   ├── page.tsx                  # Home/Dashboard page
-│   │   └── layout.tsx                # Root layout
+│   │   │   ├── projects/          # Project CRUD operations
+│   │   │   ├── deployments/       # Deployment management
+│   │   │   └── export/           # Project export
+│   │   ├── create/               # Create new project
+│   │   ├── project/[id]/        # Project detail page
+│   │   ├── layout.tsx           # Root layout
+│   │   ├── page.tsx             # Dashboard
+│   │   └── globals.css          # Global styles
+│   ├── components/
+│   │   ├── ui/                  # shadcn/ui components
+│   │   ├── MonacoEditor.tsx    # Code editor
+│   │   └── WebContainerPreview.tsx  # Live preview
 │   ├── lib/
-│   │   ├── supabase.ts               # Supabase client
-│   │   └── agent.ts                  # AI agent logic
+│   │   ├── supabase.ts         # Supabase client
+│   │   ├── ai-agent.ts         # AI agent logic
+│   │   ├── store.ts            # State management
+│   │   └── utils.ts            # Utility functions
 │   └── types/
-│       └── index.ts                  # TypeScript types
+│       └── index.ts            # TypeScript types
 ├── supabase/
-│   └── migrations/
-│       └── 001_initial_schema.sql    # Database schema
+│   └── migrations/             # Database migrations
+├── public/                     # Static assets
 └── package.json
 ```
 
-## API Routes
+## 🔌 API Endpoints
 
-### `GET /api/projects`
-List all projects
+### Projects
+- `GET /api/projects` - List all projects
+- `POST /api/projects` - Create new project
+- `GET /api/projects/[id]` - Get project details
+- `PATCH /api/projects/[id]` - Update project
+- `DELETE /api/projects/[id]` - Delete project
 
-### `POST /api/projects`
-Create a new project and start AI generation
+### AI Operations
+- `POST /api/projects/[id]/refine` - Refine code with AI
 
-### `GET /api/projects/[id]`
-Get a specific project
+### Deployments
+- `GET /api/deployments` - List deployments
+- `GET /api/deployments?project_id=xxx` - Get project deployments
+- `POST /api/projects/[id]/deploy` - Create deployment
 
-### `DELETE /api/projects/[id]`
-Delete a project
+### Export
+- `POST /api/export` - Export project as ZIP
 
-### `POST /api/projects/[id]/refine`
-Refine project code with AI feedback
+## 🎨 Templates
 
-### `POST /api/projects/[id]/deploy`
-Create a deployment to Vercel
+The app comes with 6 built-in templates:
 
-### `GET /api/deployments?project_id=xxx`
-List deployments for a project
+1. **Landing Page** - Modern landing page with hero and CTA
+2. **Admin Dashboard** - Full-featured admin panel
+3. **E-commerce Store** - Online store with cart
+4. **Blog Platform** - Blog with posts and comments
+5. **Portfolio Site** - Personal portfolio
+6. **SaaS Application** - Full SaaS with auth
 
-## Database Schema
+## 🔐 Security
 
-### Projects Table
-- `id`: UUID (primary key)
-- `name`: Project name
-- `description`: Brief description
-- `prompt`: User's original prompt
-- `code`: Generated code
-- `status`: draft, generating, completed, or error
-- `user_id`: User identifier
-- `created_at`: Creation timestamp
-- `updated_at`: Last update timestamp
+- Row Level Security (RLS) on all Supabase tables
+- API rate limiting
+- CORS configuration
+- Secure API key handling
+- Authentication with Supabase Auth
+- Two-factor authentication support
 
-### Deployments Table
-- `id`: UUID (primary key)
-- `project_id`: Reference to projects table
-- `vercel_url`: Deployment URL
-- `status`: pending, deployed, or failed
-- `created_at`: Creation timestamp
+## 🚢 Deployment
 
-## Deployment to Vercel
+### Vercel
 
-1. Push your code to GitHub
-2. Import your project in Vercel
-3. Add environment variables in Vercel dashboard
+1. Push code to GitHub
+2. Import project in Vercel
+3. Add environment variables
 4. Deploy
 
-For automatic Vercel deployments, you would need to:
-1. Install Vercel CLI: `npm i -g vercel`
-2. Set up Vercel API token
-3. Integrate Vercel deployment API in the backend
+```bash
+vercel --prod
+```
 
-## Customization
+### Environment Variables for Production
 
-### AI Prompts
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_AI_API_URL`
+- `NEXT_PUBLIC_APP_URL`
 
-Modify the system prompts in `src/lib/agent.ts` to customize:
-- App specification generation
-- Code generation style
-- Refinement behavior
+## 🧪 Testing
 
-### Styling
+```bash
+# Run tests (when implemented)
+npm test
 
-Customize Tailwind configuration in `tailwind.config.ts`
-Update colors and themes in component files
+# Run linting
+npm run lint
 
-### Database
+# Type check
+npm run type-check
+```
 
-Add more tables or columns in `supabase/migrations/`
-Update TypeScript types in `src/types/index.ts`
-
-## Troubleshooting
-
-### AI Generation Errors
-- Check your OpenAI API key is valid
-- Ensure you have sufficient API credits
-- Review the logs for specific error messages
-
-### Database Errors
-- Verify Supabase credentials
-- Run the migration script
-- Check RLS policies if using auth
-
-### Deployment Issues
-- Ensure project status is "completed"
-- Check Vercel API configuration
-- Review deployment logs
-
-## Contributing
+## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## License
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-MIT License - see LICENSE file for details.
+## 📄 License
 
-## Support
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
 
 For issues and questions, please open an issue on GitHub.
+
+## 🙏 Acknowledgments
+
+- [Next.js](https://nextjs.org/) - The React framework
+- [Supabase](https://supabase.com/) - The open source Firebase alternative
+- [shadcn/ui](https://ui.shadcn.com/) - Beautiful UI components
+- [Monaco Editor](https://microsoft.github.io/monaco-editor/) - Code editor
+- [WebContainer](https://webcontainer.io/) - In-browser web development
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+
+## 📞 Contact
+
+- GitHub: [@eugenemcmillian220-ui](https://github.com/eugenemcmillian220-ui)
+- Repository: [Build-cash-cow](https://github.com/eugenemcmillian220-ui/Build-cash-cow)
+
+---
+
+Built with ❤️ using AI and modern web technologies.

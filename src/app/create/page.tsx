@@ -3,130 +3,277 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { ArrowLeft, Sparkles, Loader2, Check } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { useAppStore } from '@/lib/store'
+
+const TEMPLATES = [
+  {
+    id: 'landing-page',
+    name: 'Landing Page',
+    description: 'Beautiful landing page with hero section, features, and CTA',
+    icon: '🎯',
+    prompt: 'Create a modern landing page with a hero section, features grid, testimonials, and a call-to-action footer. Use a clean, professional design with smooth animations.'
+  },
+  {
+    id: 'dashboard',
+    name: 'Admin Dashboard',
+    description: 'Full-featured admin dashboard with charts and tables',
+    icon: '📊',
+    prompt: 'Create an admin dashboard with sidebar navigation, data charts, statistics cards, a data table with filtering, and user management section.'
+  },
+  {
+    id: 'ecommerce',
+    name: 'E-commerce Store',
+    description: 'Online store with product listings and cart',
+    icon: '🛒',
+    prompt: 'Create an e-commerce store with product grid, product cards with images and prices, shopping cart sidebar, and checkout flow.'
+  },
+  {
+    id: 'blog',
+    name: 'Blog Platform',
+    description: 'Blog with posts, categories, and comments',
+    icon: '✍️',
+    prompt: 'Create a blog platform with a homepage showing recent posts, individual post pages with content, sidebar with categories, and comment section.'
+  },
+  {
+    id: 'portfolio',
+    name: 'Portfolio Site',
+    description: 'Personal portfolio with projects and about section',
+    icon: '💼',
+    prompt: 'Create a personal portfolio website with an about section, projects showcase with case studies, skills section, and contact form.'
+  },
+  {
+    id: 'saas',
+    name: 'SaaS Application',
+    description: 'SaaS app with authentication and dashboard',
+    icon: '☁️',
+    prompt: 'Create a SaaS application with login/signup pages, user dashboard, subscription plans section, and settings page.'
+  }
+]
 
 export default function CreateProject() {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    prompt: '',
-  })
+  const { addProject, setLoading } = useAppStore()
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
+  const [customMode, setCustomMode] = useState(false)
+  const [projectName, setProjectName] = useState('')
+  const [projectDescription, setProjectDescription] = useState('')
+  const [projectPrompt, setProjectPrompt] = useState('')
+  const [isCreating, setIsCreating] = useState(false)
+  const [createdProjectId, setCreatedProjectId] = useState<string | null>(null)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+  const handleSelectTemplate = (template: typeof TEMPLATES[0]) => {
+    setSelectedTemplate(template.id)
+    setCustomMode(false)
+    setProjectPrompt(template.prompt)
+    setProjectName(`${template.name} Project`)
+    setProjectDescription(template.description)
+  }
 
+  const handleCustomMode = () => {
+    setSelectedTemplate(null)
+    setCustomMode(true)
+  }
+
+  const handleCreateProject = async () => {
+    if (!projectName || !projectDescription || !projectPrompt) {
+      alert('Please fill in all fields')
+      return
+    }
+
+    setIsCreating(true)
     try {
       const response = await fetch('/api/projects', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: projectName,
+          description: projectDescription,
+          prompt: projectPrompt
+        })
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to create project')
-      }
+      if (!response.ok) throw new Error('Failed to create project')
 
       const data = await response.json()
-      router.push(`/project/${data.project.id}`)
+      setCreatedProjectId(data.project.id)
+      addProject(data.project)
+      
+      // Redirect after a short delay
+      setTimeout(() => {
+        router.push(`/project/${data.project.id}`)
+      }, 1500)
     } catch (error) {
       console.error('Error creating project:', error)
       alert('Failed to create project. Please try again.')
-    } finally {
-      setLoading(false)
+      setIsCreating(false)
     }
+  }
+
+  if (createdProjectId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-blue-900 flex items-center justify-center">
+        <Card className="max-w-md w-full mx-4">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-4 h-16 w-16 rounded-full bg-green-100 flex items-center justify-center">
+                <Check className="h-8 w-8 text-green-600" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Project Created!</h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Your AI is now generating your application...
+              </p>
+              <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-blue-900">
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
         <div className="mb-8">
-          <Link
-            href="/"
-            className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
-          >
-            ← Back to Projects
+          <Link href="/">
+            <Button variant="ghost" className="mb-4 gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Button>
           </Link>
-        </div>
-
-        <div className="mx-auto max-w-2xl">
-          <h1 className="mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-4xl font-bold text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
             Create New Project
           </h1>
-          <p className="mb-8 text-gray-600 dark:text-gray-400">
-            Describe your app and let AI generate it for you
+          <p className="text-gray-600 dark:text-gray-300">
+            Choose a template or describe your custom application
           </p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Project Name
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-purple-900"
-                placeholder="My Awesome App"
-              />
+        <div className="grid gap-8 lg:grid-cols-2">
+          {/* Templates Section */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Start with a Template
+              </h2>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCustomMode}
+                className={customMode ? 'bg-purple-50 border-purple-600' : ''}
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                Custom AI Generation
+              </Button>
             </div>
 
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Description
-              </label>
-              <textarea
-                required
-                rows={3}
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-purple-900"
-                placeholder="Brief description of what your app does"
-              />
+            <div className="grid gap-3">
+              {TEMPLATES.map((template) => (
+                <Card
+                  key={template.id}
+                  className={`cursor-pointer transition-all hover:shadow-lg ${
+                    selectedTemplate === template.id
+                      ? 'ring-2 ring-purple-600 bg-purple-50'
+                      : ''
+                  }`}
+                  onClick={() => handleSelectTemplate(template)}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="text-3xl">{template.icon}</div>
+                      <div>
+                        <CardTitle className="text-lg">{template.name}</CardTitle>
+                        <CardDescription>{template.description}</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+              ))}
             </div>
+          </div>
 
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                App Prompt
-              </label>
-              <textarea
-                required
-                rows={8}
-                value={formData.prompt}
-                onChange={(e) =>
-                  setFormData({ ...formData, prompt: e.target.value })
-                }
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 font-mono text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-purple-900"
-                placeholder="Describe your app in detail. Include features, UI requirements, functionality, and any specific technologies you prefer..."
-              />
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                Example: "Create a todo app with categories, due dates, and a dashboard with statistics. Use a modern, clean design with purple accents."
-              </p>
-            </div>
+          {/* Configuration Section */}
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Project Configuration
+            </h2>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-4 font-semibold text-white transition-all hover:scale-[1.02] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                  Generating App...
-                </span>
-              ) : (
-                'Generate App with AI'
-              )}
-            </button>
-          </form>
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  {customMode ? 'Custom Project' : TEMPLATES.find(t => t.id === selectedTemplate)?.name || 'Select a Template'}
+                </CardTitle>
+                <CardDescription>
+                  Configure your project details
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Project Name
+                  </label>
+                  <Input
+                    placeholder="My Awesome App"
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Description
+                  </label>
+                  <Textarea
+                    placeholder="A brief description of your project"
+                    value={projectDescription}
+                    onChange={(e) => setProjectDescription(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Project Requirements
+                  </label>
+                  <Textarea
+                    placeholder={
+                      customMode
+                        ? 'Describe your application in detail... What features do you need? What should it look like?'
+                        : 'Customize the template with your specific requirements...'
+                    }
+                    value={projectPrompt}
+                    onChange={(e) => setProjectPrompt(e.target.value)}
+                    rows={8}
+                    className="font-mono text-sm"
+                  />
+                </div>
+
+                <Button
+                  onClick={handleCreateProject}
+                  disabled={isCreating || !projectName || !projectDescription || !projectPrompt}
+                  className="w-full gap-2"
+                  size="lg"
+                >
+                  {isCreating ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Creating Project...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-5 w-5" />
+                      Generate App with AI
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
-import { appBuilderAgent } from '@/lib/agent'
+import { aiAgent } from '@/lib/ai-agent'
 
 export async function POST(
   request: NextRequest,
@@ -39,7 +39,7 @@ export async function POST(
       )
     }
 
-    const refinedCode = await appBuilderAgent.refineCode((project as any).code, feedback)
+    const refinedCode = await aiAgent.refactorCode(project.code, feedback)
 
     const { data: updatedProject, error: updateError } = await (supabase as any)
       .from('projects')
@@ -53,7 +53,7 @@ export async function POST(
 
     if (updateError) throw updateError
 
-    return NextResponse.json({ project: updatedProject })
+    return NextResponse.json({ project: updatedProject, code: refinedCode })
   } catch (error) {
     console.error('Error refining project:', error)
     return NextResponse.json(
