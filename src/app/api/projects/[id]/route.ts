@@ -7,7 +7,14 @@ export async function GET(
 ) {
   const { id } = await params
   try {
-    const { data: project, error } = await supabase
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 500 }
+      )
+    }
+
+    const { data: project, error } = await (supabase as any)
       .from('projects')
       .select('*')
       .eq('id', id)
@@ -37,7 +44,14 @@ export async function DELETE(
 ) {
   const { id } = await params
   try {
-    const { error } = await supabase
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 500 }
+      )
+    }
+
+    const { error } = await (supabase as any)
       .from('projects')
       .delete()
       .eq('id', id)
@@ -60,10 +74,17 @@ export async function PATCH(
 ) {
   const { id } = await params
   try {
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 500 }
+      )
+    }
+
     const body = await request.json()
     const { name, description } = body
 
-    const { data: project, error } = await supabase
+    const { data: project, error } = await (supabase as any)
       .from('projects')
       .update({
         name,

@@ -3,10 +3,17 @@ import { supabase } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   try {
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 500 }
+      )
+    }
+
     const searchParams = request.nextUrl.searchParams
     const projectId = searchParams.get('project_id')
 
-    let query = supabase.from('deployments').select('*')
+    let query = (supabase as any).from('deployments').select('*')
 
     if (projectId) {
       query = query.eq('project_id', projectId)

@@ -1,71 +1,27 @@
 import { createClient } from '@supabase/supabase-js'
+import type { Database } from './types'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+// Lazy initialization to avoid build-time errors
+let supabaseClient: ReturnType<typeof createClient<Database>> | null = null
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+function getSupabaseClient() {
+  if (supabaseClient) return supabaseClient
 
-export type Database = {
-  public: {
-    Tables: {
-      projects: {
-        Row: {
-          id: string
-          name: string
-          description: string
-          prompt: string
-          code: string
-          status: 'draft' | 'generating' | 'completed' | 'error'
-          user_id: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          description: string
-          prompt: string
-          code?: string
-          status?: 'draft' | 'generating' | 'completed' | 'error'
-          user_id: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          description?: string
-          prompt?: string
-          code?: string
-          status?: 'draft' | 'generating' | 'completed' | 'error'
-          user_id?: string
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      deployments: {
-        Row: {
-          id: string
-          project_id: string
-          vercel_url: string
-          status: 'pending' | 'deployed' | 'failed'
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          project_id: string
-          vercel_url?: string
-          status?: 'pending' | 'deployed' | 'failed'
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          project_id?: string
-          vercel_url?: string
-          status?: 'pending' | 'deployed' | 'failed'
-          created_at?: string
-        }
-      }
-    }
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseAnonKey || supabaseUrl === 'your_supabase_url_here') {
+    return null
+  }
+
+  try {
+    supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey)
+    return supabaseClient
+  } catch (error) {
+    console.error('Failed to initialize Supabase client:', error)
+    return null
   }
 }
+
+export const supabase = getSupabaseClient()
+export type { Database } from './types'

@@ -8,6 +8,13 @@ export async function POST(
 ) {
   const { id } = await params
   try {
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 500 }
+      )
+    }
+
     const body = await request.json()
     const { feedback } = body
 
@@ -22,7 +29,7 @@ export async function POST(
       .from('projects')
       .select('*')
       .eq('id', id)
-      .single()
+      .single() as any
 
     if (fetchError) throw fetchError
     if (!project) {
@@ -32,9 +39,9 @@ export async function POST(
       )
     }
 
-    const refinedCode = await appBuilderAgent.refineCode(project.code, feedback)
+    const refinedCode = await appBuilderAgent.refineCode((project as any).code, feedback)
 
-    const { data: updatedProject, error: updateError } = await supabase
+    const { data: updatedProject, error: updateError } = await (supabase as any)
       .from('projects')
       .update({
         code: refinedCode,

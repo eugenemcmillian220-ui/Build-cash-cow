@@ -8,11 +8,18 @@ export async function POST(
 ) {
   const { id } = await params
   try {
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 500 }
+      )
+    }
+
     const { data: project, error: projectError } = await supabase
       .from('projects')
       .select('*')
       .eq('id', id)
-      .single()
+      .single() as any
 
     if (projectError) throw projectError
     if (!project) {
@@ -31,7 +38,7 @@ export async function POST(
 
     const deploymentId = uuidv4()
 
-    const { data: deployment, error: insertError } = await supabase
+    const { data: deployment, error: insertError } = await (supabase as any)
       .from('deployments')
       .insert({
         id: deploymentId,
@@ -67,7 +74,9 @@ async function simulateDeployment(deploymentId: string, projectId: string) {
 
   const mockVercelUrl = `https://project-${projectId.slice(0, 8)}.vercel.app`
 
-  const { error } = await supabase
+  if (!supabase) return
+
+  const { error } = await (supabase as any)
     .from('deployments')
     .update({
       vercel_url: mockVercelUrl,
@@ -79,7 +88,9 @@ async function simulateDeployment(deploymentId: string, projectId: string) {
 }
 
 async function updateDeploymentStatus(deploymentId: string, status: 'deployed' | 'failed') {
-  const { error } = await supabase
+  if (!supabase) return
+
+  const { error } = await (supabase as any)
     .from('deployments')
     .update({ status })
     .eq('id', deploymentId)
