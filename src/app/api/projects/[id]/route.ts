@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabase, supabaseUntyped } from '@/lib/supabase'
+import type { ProjectRow } from '@/lib/types'
 
 export async function GET(
   request: NextRequest,
@@ -14,10 +15,11 @@ export async function GET(
       )
     }
 
-    const { data: project, error } = await (supabase as any)
+    const { data: project, error } = await supabase
       .from('projects')
       .select('*')
       .eq('id', id)
+      .returns<ProjectRow[]>()
       .single()
 
     if (error) throw error
@@ -51,7 +53,7 @@ export async function DELETE(
       )
     }
 
-    const { error } = await (supabase as any)
+    const { error } = await supabaseUntyped!
       .from('projects')
       .delete()
       .eq('id', id)
@@ -84,7 +86,7 @@ export async function PATCH(
     const body = await request.json()
     const { name, description } = body
 
-    const { data: project, error } = await (supabase as any)
+    const { data: project, error } = await supabaseUntyped!
       .from('projects')
       .update({
         name,

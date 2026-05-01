@@ -1,8 +1,7 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from './types'
 
-// Lazy initialization to avoid build-time errors
-let supabaseClient: ReturnType<typeof createClient<Database>> | null = null
+let supabaseClient: SupabaseClient<Database> | null = null
 
 function getSupabaseClient() {
   if (supabaseClient) return supabaseClient
@@ -24,4 +23,13 @@ function getSupabaseClient() {
 }
 
 export const supabase = getSupabaseClient()
+
+/**
+ * Untyped Supabase client for deployment mutations where the generic
+ * chain doesn't resolve correctly with hand-crafted Database types.
+ * Prefer the typed `supabase` export for project queries.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const supabaseUntyped = supabase as SupabaseClient<any> | null
+
 export type { Database } from './types'

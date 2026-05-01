@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabase, supabaseUntyped } from '@/lib/supabase'
+import type { ProjectRow } from '@/lib/types'
 import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(
@@ -22,7 +23,8 @@ export async function POST(
       .from('projects')
       .select('*')
       .eq('id', id)
-      .single() as any
+      .returns<ProjectRow[]>()
+      .single()
 
     if (projectError) throw projectError
     if (!project) {
@@ -41,7 +43,7 @@ export async function POST(
 
     const deploymentId = uuidv4()
 
-    const { data: deployment, error: insertError } = await (supabase as any)
+    const { data: deployment, error: insertError } = await supabaseUntyped!
       .from('deployments')
       .insert({
         id: deploymentId,
@@ -56,9 +58,8 @@ export async function POST(
 
     if (insertError) throw insertError
 
-    // Start deployment process
     if (platform === 'vercel') {
-      deployToVercel(deploymentId, id, project).catch((error) => {
+      deployToVercel(deploymentId, id).catch((error) => {
         console.error('Error deploying:', error)
         updateDeploymentStatus(deploymentId, 'failed', 'Deployment failed')
       })
@@ -74,20 +75,16 @@ export async function POST(
   }
 }
 
-async function deployToVercel(deploymentId: string, projectId: string, project: any) {
-  // In a real implementation, you would:
-  // 1. Create a zip file of the project
-  // 2. Upload to Vercel using their API
-  // 3. Monitor deployment status
-  
-  // For demo purposes, we'll simulate a successful deployment
+async function deployToVercel(deploymentId: string, projectId: string) {
+  // TODO: Wire real Vercel API deployment here.
+  // For now, simulate a successful deployment after a short delay.
   await new Promise((resolve) => setTimeout(resolve, 3000))
 
   const mockVercelUrl = `https://ai-app-${projectId.slice(0, 8)}.vercel.app`
 
-  if (!supabase) return
+  if (!supabaseUntyped) return
 
-  const { error } = await (supabase as any)
+  const { error } = await supabaseUntyped
     .from('deployments')
     .update({
       deployment_url: mockVercelUrl,
@@ -97,24 +94,23 @@ async function deployToVercel(deploymentId: string, projectId: string, project: 
 
   if (error) throw error
 
-  // Update project status
-  await (supabase as any)
+  await supabaseUntyped
     .from('projects')
     .update({ status: 'deployed' })
     .eq('id', projectId)
 }
 
 async function updateDeploymentStatus(
-  deploymentId: string, 
+  deploymentId: string,
   status: 'deployed' | 'failed',
   buildLogs?: string
 ) {
-  if (!supabase) return
+  if (!supabaseUntyped) return
 
-  const updates: any = { status }
+  const updates: Record<string, unknown> = { status }
   if (buildLogs) updates.build_logs = buildLogs
 
-  const { error } = await (supabase as any)
+  const { error } = await supabaseUntyped
     .from('deployments')
     .update(updates)
     .eq('id', deploymentId)

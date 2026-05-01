@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabaseUntyped } from '@/lib/supabase'
 import JSZip from 'jszip'
 
 export async function POST(request: NextRequest) {
@@ -14,14 +14,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!supabase) {
+    if (!supabaseUntyped) {
       return NextResponse.json(
         { error: 'Database not configured' },
         { status: 500 }
       )
     }
 
-    const { data: project, error } = await (supabase as any)
+    const { data: project, error } = await supabaseUntyped
       .from('projects')
       .select('*')
       .eq('id', projectId)
@@ -35,14 +35,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create ZIP file
     const zip = new JSZip()
 
-    // Add project files
     zip.file('README.md', `# ${project.name}\n\n${project.description}\n`)
     zip.file('src/app/page.tsx', project.code || '// Your code here')
-    
-    // Add package.json
+
     zip.file('package.json', JSON.stringify({
       name: project.name.toLowerCase().replace(/\s+/g, '-'),
       version: '1.0.0',
@@ -69,7 +66,6 @@ export async function POST(request: NextRequest) {
       }
     }, null, 2))
 
-    // Add tsconfig.json
     zip.file('tsconfig.json', JSON.stringify({
       compilerOptions: {
         target: 'ES2017',
@@ -92,13 +88,10 @@ export async function POST(request: NextRequest) {
       exclude: ['node_modules']
     }, null, 2))
 
-    // Add next.config.js
     zip.file('next.config.js', '/** @type {import(\'next\').NextConfig} */\nconst nextConfig = {}\nmodule.exports = nextConfig')
 
-    // Add tailwind.config.ts
     zip.file('tailwind.config.ts', `import type { Config } from 'tailwindcss'\n\nconst config: Config = {\n  content: [\n    './pages/**/*.{js,ts,jsx,tsx,mdx}',\n    './components/**/*.{js,ts,jsx,tsx,mdx}',\n    './app/**/*.{js,ts,jsx,tsx,mdx}',\n  ],\n  theme: {\n    extend: {},\n  },\n  plugins: [],\n}\nexport default config`)
 
-    // Generate ZIP
     const zipBuffer = await zip.generateAsync({ type: 'uint8array' })
 
     return new NextResponse(Buffer.from(zipBuffer), {
