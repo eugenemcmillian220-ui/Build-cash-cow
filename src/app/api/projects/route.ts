@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
-import { aiAgent } from '@/lib/ai-agent'
+import { supabase, supabaseUntyped } from '@/lib/supabase'
+import { runPipeline } from '@/lib/ai-pipeline'
 import { v4 as uuidv4 } from 'uuid'
 
 export async function GET() {
@@ -12,7 +12,7 @@ export async function GET() {
       )
     }
 
-    const { data: projects, error } = await (supabase as any)
+    const { data: projects, error } = await supabase
       .from('projects')
       .select('*')
       .order('created_at', { ascending: false })
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     const projectId = uuidv4()
 
-    const { data: project, error: insertError } = await (supabase as any)
+    const { data: project, error: insertError } = await supabaseUntyped!
       .from('projects')
       .insert({
         id: projectId,
@@ -59,15 +59,15 @@ export async function POST(request: NextRequest) {
         prompt,
         code: '',
         status: 'generating',
-        user_id: 'demo-user', // In production, use authenticated user ID
+        user_id: 'demo-user',
       })
       .select()
       .single()
 
     if (insertError) throw insertError
 
-    // Start async generation
-    generateAppCode(projectId, prompt).catch((error) => {
+    // Run the full AI pipeline asynchronously
+    generateWithPipeline(projectId, prompt).catch((error) => {
       console.error('Error generating app:', error)
       updateProjectStatus(projectId, 'error')
     })
@@ -82,34 +82,27 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function generateAppCode(projectId: string, prompt: string) {
-  try {
-    // Generate code using AI agent
-    const code = await aiAgent.generateCode(prompt)
+async function generateWithPipeline(projectId: string, prompt: string) {
+  const result = await runPipeline(prompt)
 
-    // Update project with generated code
-    if (!supabase) return
+  if (!supabase) return
 
-    const { error } = await (supabase as any)
-      .from('projects')
-      .update({
-        code,
-        status: 'completed',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', projectId)
+  const { error } = await supabaseUntyped!
+    .from('projects')
+    .update({
+      code: result.code,
+      status: 'completed',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', projectId)
 
-    if (error) throw error
-  } catch (error) {
-    console.error('Error in generateAppCode:', error)
-    throw error
-  }
+  if (error) throw error
 }
 
 async function updateProjectStatus(projectId: string, status: 'completed' | 'error') {
   if (!supabase) return
 
-  const { error } = await (supabase as any)
+  const { error } = await supabaseUntyped!
     .from('projects')
     .update({ status, updated_at: new Date().toISOString() })
     .eq('id', projectId)

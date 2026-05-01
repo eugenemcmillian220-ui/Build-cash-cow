@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
-import { aiAgent } from '@/lib/ai-agent'
+import { supabase, supabaseUntyped } from '@/lib/supabase'
+import type { ProjectRow } from '@/lib/types'
+import { refinePipeline } from '@/lib/ai-pipeline'
 
 export async function POST(
   request: NextRequest,
@@ -29,7 +30,8 @@ export async function POST(
       .from('projects')
       .select('*')
       .eq('id', id)
-      .single() as any
+      .returns<ProjectRow[]>()
+      .single()
 
     if (fetchError) throw fetchError
     if (!project) {
@@ -39,12 +41,12 @@ export async function POST(
       )
     }
 
-    const refinedCode = await aiAgent.refactorCode(project.code, feedback)
+    const result = await refinePipeline(project.code, feedback)
 
-    const { data: updatedProject, error: updateError } = await (supabase as any)
+    const { data: updatedProject, error: updateError } = await supabaseUntyped!
       .from('projects')
       .update({
-        code: refinedCode,
+        code: result.code,
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
@@ -53,7 +55,7 @@ export async function POST(
 
     if (updateError) throw updateError
 
-    return NextResponse.json({ project: updatedProject, code: refinedCode })
+    return NextResponse.json({ project: updatedProject, code: result.code })
   } catch (error) {
     console.error('Error refining project:', error)
     return NextResponse.json(
